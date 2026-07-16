@@ -2,6 +2,7 @@ export type RepositoryStatus = 'inbox' | 'organized' | 'watching'
 
 export interface StarredRepository {
   id: number
+  nodeId: string
   name: string
   owner: string
   fullName: string
@@ -23,9 +24,23 @@ export interface StarredRepository {
 
 export interface StarGroup {
   id: string
+  githubId?: string
   name: string
+  description?: string
+  isPrivate?: boolean
   color: string
   createdAt: string
+  updatedAt?: string
+}
+
+export interface GitHubList {
+  id: string
+  name: string
+  description: string
+  isPrivate: boolean
+  createdAt: string
+  updatedAt: string
+  repositoryNodeIds: string[]
 }
 
 export interface AppSetting {

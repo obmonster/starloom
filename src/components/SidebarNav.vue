@@ -4,7 +4,7 @@
       <span class="brand-mark">✦</span>
       <div>
         <strong>Starloom</strong>
-        <span>Weave stars into order</span>
+        <span>Native Lists, organized</span>
       </div>
     </div>
 
@@ -28,20 +28,44 @@
           ＋
         </button>
       </div>
-      <button
+      <div
         v-for="group in groups"
         :key="group.id"
-        class="nav-item"
-        :class="{ 'nav-item--active': activeView === group.id }"
-        type="button"
-        @click="emit('select-view', group.id)"
+        class="group-nav-row"
       >
-        <span>
-          <i class="group-dot" :style="{ backgroundColor: group.color }" />
-          {{ group.name }}
-        </span>
-        <small>{{ groupCounts[group.id] ?? 0 }}</small>
-      </button>
+        <button
+          class="nav-item"
+          :class="{ 'nav-item--active': activeView === group.id }"
+          type="button"
+          @click="emit('select-view', group.id)"
+        >
+          <span>
+            <i class="group-dot" :style="{ backgroundColor: group.color }" />
+            <span class="group-name">{{ group.name }}</span>
+            <i
+              v-if="group.githubId"
+              class="group-origin"
+              :title="group.isPrivate ? 'GitHub Private List' : 'GitHub Public List'"
+            >{{ group.isPrivate ? '◆' : '◇' }}</i>
+            <i v-else class="group-origin" title="尚未发布到 GitHub">LOCAL</i>
+          </span>
+          <small>{{ groupCounts[group.id] ?? 0 }}</small>
+        </button>
+        <div class="group-nav-row__actions">
+          <button
+            class="icon-button"
+            type="button"
+            :title="`编辑 ${group.name}`"
+            @click="emit('edit-group', group.id)"
+          >✎</button>
+          <button
+            class="icon-button"
+            type="button"
+            :title="`删除 ${group.name}`"
+            @click="emit('delete-group', group.id)"
+          >×</button>
+        </div>
+      </div>
     </nav>
 
     <div v-if="profile" class="profile-card">
@@ -75,6 +99,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'select-view': [view: RepositoryView]
   'create-group': []
+  'edit-group': [groupId: string]
+  'delete-group': [groupId: string]
   disconnect: []
 }>()
 

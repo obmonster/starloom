@@ -2,11 +2,11 @@
   <main class="connect-shell">
     <section class="connect-card">
       <div class="brand-mark brand-mark--large">✦</div>
-      <p class="eyebrow">LOCAL-FIRST STAR MANAGER</p>
-      <h1>把散落的 Stars<br />编织成你的知识库</h1>
+      <p class="eyebrow">NATIVE GITHUB LISTS, BATCHED</p>
+      <h1>批量整理 GitHub<br />原生 Lists</h1>
       <p class="connect-card__intro">
-        Starloom 从 GitHub 同步收藏，在浏览器本地完成批量分组、标签和清理。你的 Token
-        不会离开这台设备。
+        Starloom 同步 Stars 与原生 Lists，在本地预览批量分类结果，并在确认后通过 GitHub
+        GraphQL API 安全写回。
       </p>
 
       <form class="token-form" @submit.prevent="handleSubmit">
@@ -29,7 +29,7 @@
 
       <div class="permission-note">
         <strong>建议使用最小权限 Token</strong>
-        <span>读取 Stars 即可同步；执行批量 Unstar 时需要允许修改 Star 状态。</span>
+        <span>Token 需要允许读取 Stars 与 Lists；修改 Lists 或执行 Unstar 时还需要对应写权限。</span>
       </div>
     </section>
   </main>
