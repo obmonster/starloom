@@ -4,12 +4,12 @@
       <span class="brand-mark">✦</span>
       <div>
         <strong>Starloom</strong>
-        <span>Native Lists, organized</span>
+        <span>GitHub Stars 管理工作台</span>
       </div>
     </div>
 
     <nav class="sidebar__nav" aria-label="仓库视图">
-      <p class="sidebar__label">LIBRARY</p>
+      <p class="sidebar__label">仓库</p>
       <button
         v-for="item in systemViews"
         :key="item.id"
@@ -23,7 +23,7 @@
       </button>
 
       <div class="sidebar__heading">
-        <p class="sidebar__label">GROUPS</p>
+        <p class="sidebar__label">LISTS</p>
         <button class="icon-button" title="新建分组" type="button" @click="emit('create-group')">
           ＋
         </button>
@@ -105,10 +105,10 @@ const emit = defineEmits<{
 }>()
 
 const systemViews = computed(() => [
-  { id: 'all', label: 'All stars', icon: '✦', count: props.totalCount },
-  { id: 'inbox', label: 'Inbox', icon: '⌁', count: props.inboxCount },
-  { id: 'archived', label: 'Archived', icon: '□', count: props.archivedCount },
-  { id: 'stale', label: 'Stale', icon: '◷', count: props.staleCount }
+  { id: 'all', label: '全部收藏', icon: '✦', count: props.totalCount },
+  { id: 'inbox', label: '待整理', icon: '⌁', count: props.inboxCount },
+  { id: 'archived', label: '已归档', icon: '□', count: props.archivedCount },
+  { id: 'stale', label: '长期未更新', icon: '◷', count: props.staleCount }
 ])
 
 const lastSyncLabel = computed(() => {

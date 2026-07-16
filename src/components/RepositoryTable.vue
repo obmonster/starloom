@@ -9,10 +9,10 @@
           @change="emit('toggle-all')"
         />
       </label>
-      <span>Repository</span>
-      <span>Language</span>
-      <span>Groups</span>
-      <span>Activity</span>
+      <span>仓库</span>
+      <span>语言</span>
+      <span>Lists</span>
+      <span>活跃度</span>
     </div>
 
     <div v-if="!repositories.length" class="empty-state">
@@ -35,7 +35,7 @@
           <span v-if="repository.archived" class="badge badge--warning">Archived</span>
           <span v-if="repository.fork" class="badge">Fork</span>
         </div>
-        <p>{{ repository.description || 'No description provided.' }}</p>
+        <p>{{ repository.description || '暂无仓库简介。' }}</p>
         <div v-if="repository.topics.length || repository.tags.length" class="tag-row">
           <span v-for="topic in repository.topics.slice(0, 4)" :key="topic" class="topic-tag">
             {{ topic }}
@@ -113,11 +113,11 @@ const compactNumber = (value: number) =>
   Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
 
 const relativeDate = (value: string) => {
-  if (!value) return 'No activity'
+  if (!value) return '暂无更新'
   const days = Math.floor((Date.now() - new Date(value).getTime()) / 86_400_000)
-  if (days < 1) return 'Updated today'
-  if (days < 30) return `Updated ${days}d ago`
-  if (days < 365) return `Updated ${Math.floor(days / 30)}mo ago`
-  return `Updated ${Math.floor(days / 365)}y ago`
+  if (days < 1) return '今天更新'
+  if (days < 30) return `${days} 天前更新`
+  if (days < 365) return `${Math.floor(days / 30)} 个月前更新`
+  return `${Math.floor(days / 365)} 年前更新`
 }
 </script>

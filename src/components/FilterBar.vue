@@ -15,7 +15,7 @@
       aria-label="编程语言"
       @change="emit('update:language', ($event.target as HTMLSelectElement).value)"
     >
-      <option value="">All languages</option>
+      <option value="">全部语言</option>
       <option v-for="item in languages" :key="item" :value="item">{{ item }}</option>
     </select>
     <select
@@ -23,10 +23,10 @@
       aria-label="排序方式"
       @change="emit('update:sort', ($event.target as HTMLSelectElement).value)"
     >
-      <option value="starred-desc">Recently starred</option>
-      <option value="updated-desc">Recently updated</option>
-      <option value="stars-desc">Most starred</option>
-      <option value="name-asc">Name A–Z</option>
+      <option value="starred-desc">最近收藏</option>
+      <option value="updated-desc">最近更新</option>
+      <option value="stars-desc">Stars 最多</option>
+      <option value="name-asc">名称 A–Z</option>
     </select>
   </section>
 </template>

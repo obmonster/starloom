@@ -32,14 +32,14 @@
     <main class="workspace">
       <header class="workspace-header">
         <div>
-          <p class="eyebrow">GITHUB LISTS WORKSPACE</p>
+          <p class="eyebrow">GITHUB STARS · LISTS</p>
           <h1>{{ currentViewTitle }}</h1>
           <p>{{ currentGroup?.description || `${filteredRepositories.length} repositories in this view` }}</p>
         </div>
         <div class="header-actions">
-          <button class="button" type="button" @click="exportData">↓ Export</button>
+          <button class="button" type="button" @click="exportData">↓ 导出</button>
           <label class="button import-button">
-            ↑ Import
+            ↑ 导入
             <input ref="importInput" accept="application/json" type="file" @change="importData" />
           </label>
           <button
@@ -49,7 +49,7 @@
             @click="handleSync"
           >
             <span :class="{ spinning: syncing }">↻</span>
-            {{ syncing ? 'Syncing…' : 'Sync GitHub' }}
+            {{ syncing ? '同步中…' : '同步 GitHub' }}
           </button>
         </div>
       </header>
@@ -96,7 +96,7 @@
               清空当前分组
             </button>
           </div>
-          <span>Page {{ page }} of {{ pageCount }}</span>
+          <span>第 {{ page }} / {{ pageCount }} 页</span>
         </div>
 
         <RepositoryTable
@@ -112,7 +112,7 @@
 
         <footer v-if="filteredRepositories.length" class="pagination">
           <button class="button button--compact" type="button" :disabled="page === 1" @click="page--">
-            ← Previous
+            ← 上一页
           </button>
           <span>{{ rangeStart }}–{{ rangeEnd }} of {{ filteredRepositories.length }}</span>
           <button
@@ -121,7 +121,7 @@
             :disabled="page === pageCount"
             @click="page++"
           >
-            Next →
+            下一页 →
           </button>
         </footer>
       </section>
@@ -423,12 +423,12 @@ const githubListsUrl = computed(() =>
 const githubGroupCount = computed(() => groups.value.filter(group => group.githubId).length)
 const currentViewTitle = computed(() => {
   const labels: Record<string, string> = {
-    all: 'All stars',
-    inbox: 'Inbox',
-    archived: 'Archived repositories',
-    stale: 'Stale repositories'
+    all: '全部 GitHub Stars',
+    inbox: '待整理仓库',
+    archived: '已归档仓库',
+    stale: '长期未更新仓库'
   }
-  return labels[activeView.value] ?? groups.value.find(group => group.id === activeView.value)?.name ?? 'Stars'
+  return labels[activeView.value] ?? groups.value.find(group => group.id === activeView.value)?.name ?? 'GitHub Stars'
 })
 
 const filteredRepositories = computed(() => {

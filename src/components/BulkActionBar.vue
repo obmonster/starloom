@@ -1,9 +1,9 @@
 <template>
   <div class="bulk-bar">
-    <strong>{{ selectedCount }} selected</strong>
+    <strong>已选择 {{ selectedCount }} 个</strong>
     <span class="bulk-bar__divider" />
     <select v-model="groupId" aria-label="目标分组">
-      <option value="">Add to group…</option>
+      <option value="">加入 GitHub List…</option>
       <option v-for="group in groups" :key="group.id" :value="group.id">{{ group.name }}</option>
     </select>
     <button class="button button--compact" type="button" :disabled="!groupId" @click="assignGroup">
