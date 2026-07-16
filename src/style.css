@@ -22,9 +22,9 @@ button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: .55; }
 a { color: inherit; }
 
-.app-shell { display: grid; grid-template-columns: 276px minmax(0, 1fr); min-height: 100vh; }
+.app-shell { display: grid; grid-template-columns: var(--sidebar-width,440px) minmax(0, 1fr); min-height: 100vh; }
 .sidebar {
-  position: sticky; top: 0; display: flex; flex-direction: column; width: 276px; height: 100vh;
+  position: sticky; top: 0; display: flex; flex-direction: column; width: var(--sidebar-width,440px); height: 100vh;
   padding: 30px 20px 20px; color: #d7deea;
   background: radial-gradient(circle at 20% 0%, rgba(99,91,255,.22), transparent 34%), var(--sidebar);
   box-shadow: 12px 0 40px rgba(15,23,42,.08);
@@ -74,6 +74,17 @@ a { color: inherit; }
 }
 .profile-card img { width: 40px; height: 40px; border-radius: 12px; }
 .profile-card strong { overflow: hidden; color: #f8fafc; font-size: 14px; text-overflow: ellipsis; }
+.sidebar__resize-handle {
+  position: absolute; z-index: 3; top: 0; right: -5px; width: 10px; height: 100%; padding: 0;
+  border: 0; outline: 0; background: transparent; cursor: col-resize; touch-action: none;
+}
+.sidebar__resize-handle::after {
+  position: absolute; top: 0; bottom: 0; left: 4px; width: 2px; content: "";
+  background: transparent; transition: background 140ms ease, box-shadow 140ms ease;
+}
+.sidebar__resize-handle:hover::after, .sidebar__resize-handle:focus-visible::after {
+  background: #8179ff; box-shadow: 0 0 10px rgba(129,121,255,.72);
+}
 
 .workspace { width: 100%; max-width: 1600px; min-width: 0; margin: 0 auto; padding: 48px clamp(28px,4vw,68px) 120px; }
 .workspace-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
@@ -125,6 +136,7 @@ a { color: inherit; }
 }
 
 .library-panel { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 16px 44px rgba(30,41,59,.065); }
+.repository-table { overflow-x: auto; }
 .library-toolbar { display: flex; min-height: 60px; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
 .library-toolbar > div { display: flex; gap: 7px; }
 .library-toolbar > span { color: var(--muted); font-size: 13px; }
@@ -163,7 +175,7 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent);
 .empty-state p { margin: 0; font-size: 14px; }
 .pagination { display: flex; min-height: 66px; align-items: center; justify-content: flex-end; gap: 14px; padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 
-.bulk-bar { position: fixed; z-index: 20; right: 34px; bottom: 24px; left: 310px; display: flex; min-height: 66px; align-items: center; gap: 10px; padding: 11px 14px 11px 20px; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; color: #fff; background: rgba(17,24,39,.96); box-shadow: 0 20px 52px rgba(15,23,42,.3); backdrop-filter: blur(16px); }
+.bulk-bar { position: fixed; z-index: 20; right: 34px; bottom: 24px; left: calc(var(--sidebar-width,440px) + 34px); display: flex; min-height: 66px; align-items: center; gap: 10px; padding: 11px 14px 11px 20px; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; color: #fff; background: rgba(17,24,39,.96); box-shadow: 0 20px 52px rgba(15,23,42,.3); backdrop-filter: blur(16px); }
 .bulk-bar strong { font-size: 14px; white-space: nowrap; }
 .bulk-bar__divider { width: 1px; height: 25px; background: rgba(255,255,255,.12); }
 .bulk-bar select, .bulk-bar input { height: 40px; padding: 0 12px; border-color: rgba(255,255,255,.14); color: #eef2f7; background: rgba(255,255,255,.08); font-size: 13px; }
@@ -218,6 +230,7 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent);
   .sidebar { width: 88px; padding-inline: 12px; }
   .sidebar__brand { justify-content: center; padding-inline: 0; }
   .sidebar__brand div, .sidebar__label, .nav-item small, .profile-card div, .profile-card .icon-button { display: none; }
+  .sidebar__resize-handle { display: none; }
   .nav-item { justify-content: center; }
   .nav-item > span { font-size: 0; }
   .nav-item__icon, .group-dot { display: inline-block; }

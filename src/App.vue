@@ -11,8 +11,13 @@
     @connect="handleConnect"
   />
 
-  <div v-else class="app-shell">
+  <div
+    v-else
+    class="app-shell"
+    :style="{ '--sidebar-width': `${sidebarWidth}px` }"
+  >
     <SidebarNav
+      :width="sidebarWidth"
       :groups="groups"
       :profile="profile"
       :stale-count="staleCount"
@@ -27,6 +32,7 @@
       @create-group="createGroupVisible = true"
       @edit-group="openEditGroup"
       @delete-group="openDeleteGroup"
+      @resize="handleSidebarResize"
     />
 
     <main class="workspace">
@@ -349,13 +355,28 @@ import { useStarStore } from './stores/starStore'
 import type { BackupData, RepositoryView, StarGroup } from './types'
 
 const PAGE_SIZE = 20
+const SIDEBAR_WIDTH_KEY = 'starloom.sidebar-width'
+const DEFAULT_SIDEBAR_WIDTH = 440
+const MIN_SIDEBAR_WIDTH = 280
+const MAX_SIDEBAR_WIDTH = 440
 const systemViews: RepositoryView[] = ['all', 'inbox', 'archived', 'stale']
+
+const clampSidebarWidth = (width: number) =>
+  Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, width))
+
+const savedSidebarWidthValue = localStorage.getItem(SIDEBAR_WIDTH_KEY)
+const savedSidebarWidth = savedSidebarWidthValue === null ? Number.NaN : Number(savedSidebarWidthValue)
 
 const store = useStarStore()
 const { repositories, groups, profile, token, lastSyncAt, loading, syncing, error } =
   storeToRefs(store)
 
 const initialized = ref(false)
+const sidebarWidth = ref(
+  Number.isFinite(savedSidebarWidth)
+    ? clampSidebarWidth(savedSidebarWidth)
+    : DEFAULT_SIDEBAR_WIDTH
+)
 const activeView = ref<RepositoryView>('all')
 const search = ref('')
 const language = ref('')
@@ -507,6 +528,11 @@ const notify = (message: string, type: 'success' | 'error' = 'success') => {
   toastTimer = setTimeout(() => {
     toast.value = undefined
   }, 3200)
+}
+
+const handleSidebarResize = (width: number) => {
+  sidebarWidth.value = clampSidebarWidth(width)
+  localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth.value))
 }
 
 const handleConnect = async (nextToken: string) => {

@@ -76,15 +76,26 @@
       </div>
       <button class="icon-button" title="断开连接" type="button" @click="emit('disconnect')">↗</button>
     </div>
+
+    <button
+      type="button"
+      class="sidebar__resize-handle"
+      title="拖动调整侧栏宽度，双击恢复默认宽度"
+      aria-label="调整侧栏宽度"
+      @keydown="handleResizeKeydown"
+      @dblclick="emit('resize', DEFAULT_WIDTH)"
+      @pointerdown="startResize"
+    />
   </aside>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount } from 'vue'
 
 import type { GitHubProfile, RepositoryView, StarGroup } from '../types'
 
 const props = defineProps<{
+  width: number
   groups: StarGroup[]
   groupCounts: Record<string, number>
   activeView: RepositoryView
@@ -101,8 +112,64 @@ const emit = defineEmits<{
   'create-group': []
   'edit-group': [groupId: string]
   'delete-group': [groupId: string]
+  resize: [width: number]
   disconnect: []
 }>()
+
+const DEFAULT_WIDTH = 440
+const RESIZE_STEP = 16
+let handlePointerMove: ((event: PointerEvent) => void) | undefined
+let handlePointerUp: (() => void) | undefined
+let previousCursor = ''
+let previousUserSelect = ''
+
+const stopResize = () => {
+  if (handlePointerMove) window.removeEventListener('pointermove', handlePointerMove)
+  if (handlePointerUp) {
+    window.removeEventListener('blur', handlePointerUp)
+    window.removeEventListener('pointerup', handlePointerUp)
+    window.removeEventListener('pointercancel', handlePointerUp)
+  }
+  handlePointerMove = undefined
+  handlePointerUp = undefined
+  document.body.style.cursor = previousCursor
+  document.body.style.userSelect = previousUserSelect
+}
+
+const startResize = (event: PointerEvent) => {
+  if (event.button !== 0) return
+  event.preventDefault()
+  stopResize()
+
+  const startX = event.clientX
+  const startWidth = props.width
+  previousCursor = document.body.style.cursor
+  previousUserSelect = document.body.style.userSelect
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+
+  handlePointerMove = moveEvent => {
+    emit('resize', startWidth + moveEvent.clientX - startX)
+  }
+  handlePointerUp = stopResize
+  window.addEventListener('pointermove', handlePointerMove)
+  window.addEventListener('blur', handlePointerUp, { once: true })
+  window.addEventListener('pointerup', handlePointerUp, { once: true })
+  window.addEventListener('pointercancel', handlePointerUp, { once: true })
+}
+
+const handleResizeKeydown = (event: KeyboardEvent) => {
+  if (!['ArrowLeft', 'ArrowRight', 'Home'].includes(event.key)) return
+  event.preventDefault()
+
+  if (event.key === 'Home') {
+    emit('resize', DEFAULT_WIDTH)
+    return
+  }
+  emit('resize', props.width + (event.key === 'ArrowLeft' ? -RESIZE_STEP : RESIZE_STEP))
+}
+
+onBeforeUnmount(stopResize)
 
 const systemViews = computed(() => [
   { id: 'all', label: '全部收藏', icon: '✦', count: props.totalCount },

@@ -414,6 +414,7 @@ export const useStarStore = defineStore('stars', () => {
       .map(id => repositoryMap.value.get(id))
       .filter((repository): repository is StarredRepository => Boolean(repository))
     const groupByName = new Map(groups.value.map(group => [group.name, group]))
+    const managedGroupNames = new Set(classificationRules.map(rule => rule.group))
     const suggestionsByRepository = new Map(
       targetRepositories.map(repository => [repository.id, suggestGroups(repository)])
     )
@@ -425,11 +426,17 @@ export const useStarStore = defineStore('stars', () => {
 
     for (const rule of classificationRules) {
       if (requiredGroupNames.has(rule.group) && !groupByName.has(rule.group)) {
-        groupByName.set(rule.group, await createGroup(rule.group, rule.color))
+        groupByName.set(
+          rule.group,
+          await createGroup(rule.group, rule.color, rule.description)
+        )
       }
     }
 
     const completed: StarredRepository[] = []
+    const managedGroupIds = new Set(
+      groups.value.filter(group => managedGroupNames.has(group.name)).map(group => group.id)
+    )
     let classified = 0
     try {
       for (const repository of targetRepositories) {
@@ -437,7 +444,10 @@ export const useStarStore = defineStore('stars', () => {
           .map(rule => groupByName.get(rule.group)?.id)
           .filter((id): id is string => Boolean(id))
         if (!suggestedIds.length) continue
-        const groupIds = [...new Set([...repository.groupIds, ...suggestedIds])]
+        const groupIds = [
+          ...repository.groupIds.filter(groupId => !managedGroupIds.has(groupId)),
+          ...suggestedIds
+        ]
         completed.push(await writeRepositoryGroups(repository, groupIds))
         classified++
       }

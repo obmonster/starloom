@@ -80,9 +80,17 @@ Token 保存在当前浏览器的 `localStorage`，仓库和分类数据保存�
 
 ## 自动分类规则
 
-内置 Vue、React、Electron、Uni-app、Micro Frontend、AI、Styles & UI、Dev Tools 和 Client 规则。自动分类会先确认，再创建缺失的原生 Lists 并合并仓库归属；不会取消 Star。
+内置 10 类规则：Vue、React、UI 与可视化、Node 服务、微前端、桌面端、移动端、工程化、AI 编程工具和通用库。系统根据仓库名、Topics、简介和主语言计算相关度，每个仓库只保留得分最高的一个托管分类；自动分类会先确认，再创建缺失的原生 Lists 并写入仓库归属，不会取消 Star，也不会移除非自动分类管理的其他 Lists。
 
-规则位于 `src/services/classifier.ts`，可以直接调整关键词和颜色。
+规则目录位于 `src/services/classificationRules.json`，匹配逻辑位于 `src/services/classifier.ts`。
+
+可以使用同一套规则重新整理导出的备份：
+
+```bash
+node scripts/reclassify-backup.mjs <输入备份.json> <输出备份.json>
+```
+
+生成的 Lists 是不含 `githubId` 的本地分类草稿，导入后可以先检查结果，再按需发布到 GitHub。
 
 ## 技术栈
 

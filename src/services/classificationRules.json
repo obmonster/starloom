@@ -1,0 +1,63 @@
+[
+  {
+    "group": "Frontend · Vue",
+    "description": "Vue、Nuxt、Pinia、Element Plus 与 Vue 工程实践。",
+    "color": "#42b883",
+    "keywords": ["vue", "vuejs", "vue2", "vue3", "nuxt", "nuxtjs", "pinia", "vitepress", "element-ui", "element-plus", "vuetify"],
+    "languages": ["Vue"]
+  },
+  {
+    "group": "Frontend · React",
+    "description": "React、Redux、React Router、Next.js 与 React 工程实践。",
+    "color": "#38bdf8",
+    "keywords": ["react", "reactjs", "react-native", "redux", "react-redux", "nextjs", "next.js", "react-router", "antd", "ant-design"]
+  },
+  {
+    "group": "UI · Components & Visual",
+    "description": "组件库、设计系统、CSS、动画、图表、Canvas 与可视化。",
+    "color": "#ec4899",
+    "keywords": ["ui", "ui-kit", "ui-library", "component", "components", "component-library", "design-system", "design", "theme", "css", "css3", "css-in-js", "postcss", "tailwindcss", "animation", "animate", "canvas", "svg", "webgl", "chart", "charts", "visualization", "data-visualization", "diagram", "maps", "screenshot", "screenshots", "video", "audio", "player", "streaming", "multimedia", "highlighting", "touch", "progress", "fullpage", "flexible", "layout", "font", "ligatures", "danmu", "icons", "editor", "rich-text"]
+  },
+  {
+    "group": "Backend · Node & Services",
+    "description": "Node.js 服务端、API、WebSocket、代理、数据库与服务运行工具。",
+    "color": "#22c55e",
+    "keywords": ["node", "nodejs", "express", "nestjs", "koa", "server", "backend", "api", "websocket", "socket-io", "nginx", "ngrok", "ingress", "database", "runtime", "proxy", "load-balancer"]
+  },
+  {
+    "group": "Architecture · Micro Frontend",
+    "description": "微前端框架、运行时、示例项目与模块联邦方案。",
+    "color": "#f59e0b",
+    "keywords": ["micro-app", "microapp", "micro-frontend", "micro-frontends", "microfrontend", "qiankun", "wujie", "single-spa", "module-federation"]
+  },
+  {
+    "group": "Platform · Desktop",
+    "description": "Electron、Tauri 与 Windows、macOS、Linux 桌面应用。",
+    "color": "#8b5cf6",
+    "keywords": ["electron", "electron-vite", "tauri", "tauri-app", "desktop", "desktop-app", "desktop-application", "windows", "macos", "linux"]
+  },
+  {
+    "group": "Platform · Mobile",
+    "description": "uni-app、React Native、Taro、小程序与移动端组件。",
+    "color": "#06b6d4",
+    "keywords": ["mobile", "uni-app", "uniapp", "react-native", "taro", "miniprogram", "mini-program", "weapp", "wxapp", "applet", "wechat", "android", "ios"]
+  },
+  {
+    "group": "Engineering · Toolchain",
+    "description": "构建、编译、测试、代码质量、包管理与命令行工具。",
+    "color": "#64748b",
+    "keywords": ["build-tool", "bundler", "compiler", "typechecker", "cli", "command-line", "command-line-tool", "devtools", "developer-tools", "linter", "formatter", "eslint", "prettier", "webpack", "vite", "rollup", "babel", "testing", "testing-tools", "package-manager", "dependency-manager", "git", "hooks", "github-actions", "docker", "docs", "documentation", "cloudflare"]
+  },
+  {
+    "group": "AI · Coding Agents",
+    "description": "大模型、编程智能体、Claude、Codex 与 AI 开发工具。",
+    "color": "#a855f7",
+    "keywords": ["ai", "llm", "agent", "agents", "agentic", "ai-agent", "ai-agents", "coding-agent", "agentic-coding", "vibe-coding", "vibe-coding-cn", "machine-learning", "deep-learning", "computer-vision", "vision", "chatgpt", "gpt", "claude", "claude-code", "codex", "copilot", "mcp", "tts"]
+  },
+  {
+    "group": "Libraries · General",
+    "description": "通用 JavaScript/TypeScript 库、数据处理、网络与实用组件。",
+    "color": "#3b82f6",
+    "keywords": ["utilities", "utility", "utils", "http-client", "event-bus", "eventemitter", "date", "datetime", "calendar", "markdown", "parser", "json", "json5", "mock", "template", "templates", "sdk", "spreadsheet", "excel", "qrcode", "qr-code", "carousel", "drag-and-drop", "download", "storage", "filesystem", "selection", "range", "formatting", "ansi", "locale", "primelocale", "localization", "i18n", "validation", "sanitizer", "polyfill"]
+  }
+]
