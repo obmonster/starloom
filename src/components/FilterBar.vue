@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-[18px] grid grid-cols-1 gap-3 lg:grid-cols-[minmax(300px,1fr)_190px_190px]">
+  <div class="mb-4.5 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(300px,1fr)_190px_190px]">
     <ElInput
       clearable
       size="large"

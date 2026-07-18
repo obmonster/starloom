@@ -5,7 +5,7 @@
       <ElButton
         v-for="item in systemViews"
         text
-        class="nav-item !ml-0"
+        class="nav-item ml-0!"
         :key="item.id"
         :class="{ 'nav-item--active': activeView === item.id }"
         @click="emit('select-view', item.id)"
@@ -34,7 +34,7 @@
         <div v-for="group in groups" :key="group.id" class="group-nav-row">
           <ElButton
             text
-            class="nav-item !ml-0"
+            class="nav-item ml-0!"
             :class="{ 'nav-item--active': activeView === group.id }"
             @click="emit('select-view', group.id)"
           >
@@ -56,7 +56,7 @@
             <ElButton
               text
               circle
-              class="icon-button !ml-0"
+              class="icon-button ml-0!"
               :icon="EditPen"
               :title="`编辑 ${group.name}`"
               @click="emit('edit-group', group.id)"
@@ -64,7 +64,7 @@
             <ElButton
               text
               circle
-              class="icon-button !ml-0"
+              class="icon-button ml-0!"
               :icon="Delete"
               :title="`删除 ${group.name}`"
               @click="emit('delete-group', group.id)"

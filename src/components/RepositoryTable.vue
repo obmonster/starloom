@@ -72,7 +72,7 @@
       <template #default="{ row: repository }">
         <div class="language-cell">
           <span
-            class="size-[9px] rounded-full"
+            class="size-2.25 rounded-full"
             :style="{ backgroundColor: languageColor(repository.language) }"
           />
           {{ repository.language }}
@@ -86,7 +86,7 @@
           <ElButton
             v-for="group in repositoryGroups(repository)"
             text
-            class="group-chip !ml-0"
+            class="group-chip ml-0!"
             :key="group.id"
             :style="{ '--chip-color': group.color }"
             :title="`从 ${group.name} 移除`"
@@ -129,7 +129,7 @@
         <ElIcon>
           <StarFilled />
         </ElIcon>
-        <div class="mt-[15px] mb-1.5 text-xl font-bold text-slate-600 dark:text-slate-300">这里还没有仓库</div>
+        <div class="mt-3.75 mb-1.5 text-xl font-bold text-slate-600 dark:text-slate-300">这里还没有仓库</div>
         <div class="text-sm">调整筛选条件，或者同步一次 GitHub 仓库。</div>
       </div>
     </template>
