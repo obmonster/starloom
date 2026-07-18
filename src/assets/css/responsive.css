@@ -1,0 +1,42 @@
+@media (max-width: 980px) {
+  .app-shell { grid-template-columns: 88px minmax(0, 1fr); }
+  .sidebar { width: 88px; padding-inline: 12px; }
+  .sidebar__context { justify-content: center; padding-inline: 0; }
+  .sidebar__context>div, .sidebar__label, .nav-item small, .sidebar-status span:last-child { display: none; }
+  .sidebar__resize-handle { display: none; }
+  .nav-item { justify-content: center; }
+  .nav-item>span { font-size: 0; }
+  .nav-item__icon, .group-dot { display: inline-block; }
+  .sidebar__heading { justify-content: center; margin-inline: 0; }
+  .profile-card { display: grid; grid-template-columns: 40px; justify-content: center; padding-inline: 0; }
+  .bulk-bar { left: 116px; }
+}
+
+@media (max-width: 720px) {
+  .app-topbar { position: static; grid-template-columns: auto 1fr auto; gap: 10px; padding-inline: 12px; }
+  .topbar-brand>span:last-child { display: none; }
+  .module-switcher { justify-self: center; }
+  .module-switcher__item { padding-inline: 12px; }
+  .app-shell { display: block; }
+  .sidebar { position: static; width: 100%; height: auto; padding: 10px 12px; }
+  .sidebar__context, .sidebar-status { display: none; }
+  .sidebar__nav { display: flex; gap: 6px; overflow-x: auto; padding: 0; }
+  .sidebar__nav>.nav-item, .group-nav-row { flex: 0 0 auto; }
+  .sidebar__nav .nav-item { width: auto; min-height: 38px; margin: 0; padding: 7px 11px; }
+  .sidebar__nav .nav-item>span { font-size: 13px; }
+  .sidebar__nav .sidebar__heading, .group-nav-row__actions { display: none; }
+  .group-nav-row .nav-item { padding-right: 11px; }
+  .workspace { padding: 16px 12px 32px; }
+  .header-actions { width: 100%; flex-wrap: wrap; }
+  .lists-boundary { align-items: flex-start; flex-direction: column; }
+  .lists-boundary>div:last-child { flex-wrap: wrap; }
+  .bulk-bar { right: 12px; bottom: 12px; left: 12px; overflow-x: auto; }
+}
+
+@media (max-width: 560px) {
+  .connect-shell { padding: 16px; }
+  .connect-card { min-height: 0; grid-template-columns: 1fr; }
+  .connect-card__identity { min-height: 82px; flex-direction: row; padding: 16px 24px; }
+  .connect-card__identity .brand-mark { width: 38px; height: 38px; border-radius: 10px; font-size: 17px; }
+  .connect-card__content { padding: 28px 24px; }
+}

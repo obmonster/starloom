@@ -1,38 +1,50 @@
 <template>
-  <section class="filter-bar">
-    <div class="search-input">
-      <span>⌕</span>
-      <input
-        :value="search"
-        placeholder="搜索仓库、简介、Topic 或标签…"
-        type="search"
-        @input="emit('update:search', ($event.target as HTMLInputElement).value)"
-      />
-      <kbd>⌘ K</kbd>
-    </div>
-    <select
-      :value="language"
+  <div class="mb-[18px] grid grid-cols-1 gap-3 lg:grid-cols-[minmax(300px,1fr)_190px_190px]">
+    <ElInput
+      clearable
+      size="large"
+      placeholder="搜索仓库、简介、Topic 或标签…"
+      :model-value="search"
+      @update:model-value="emit('update:search', $event)"
+    >
+      <template #prefix>
+        <ElIcon>
+          <Search />
+        </ElIcon>
+      </template>
+      <template #suffix><span class="text-xs text-slate-400 dark:text-slate-500">⌘ K</span></template>
+    </ElInput>
+    <ElSelect
+      size="large"
       aria-label="编程语言"
-      @change="emit('update:language', ($event.target as HTMLSelectElement).value)"
+      placeholder="全部语言"
+      :model-value="language"
+      @update:model-value="emit('update:language', $event)"
     >
-      <option value="">全部语言</option>
-      <option v-for="item in languages" :key="item" :value="item">{{ item }}</option>
-    </select>
-    <select
-      :value="sort"
+      <ElOption label="全部语言" value="" />
+      <ElOption v-for="item in languages" :key="item" :label="item" :value="item" />
+    </ElSelect>
+    <ElSelect
+      size="large"
       aria-label="排序方式"
-      @change="emit('update:sort', ($event.target as HTMLSelectElement).value)"
+      :model-value="sort"
+      @update:model-value="emit('update:sort', $event)"
     >
-      <option value="starred-desc">最近收藏</option>
-      <option value="updated-desc">最近更新</option>
-      <option value="stars-desc">Stars 最多</option>
-      <option value="name-asc">名称 A–Z</option>
-    </select>
-  </section>
+      <ElOption v-if="module === 'starred'" label="最近收藏" value="starred-desc" />
+      <ElOption label="最近更新" value="updated-desc" />
+      <ElOption label="Stars 最多" value="stars-desc" />
+      <ElOption label="名称 A–Z" value="name-asc" />
+    </ElSelect>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { Search } from '@element-plus/icons-vue'
+
+import type { RepositoryModule } from '../types'
+
 defineProps<{
+  module: RepositoryModule
   search: string
   language: string
   sort: string

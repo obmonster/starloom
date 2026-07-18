@@ -1,8 +1,8 @@
 # Starloom
 
-> GitHub 原生 Lists 的批量整理与自动分类工具。
+> 统一管理自己的 GitHub 仓库、Stars 与原生 Lists。
 
-Starloom 是面向 **GitHub 原生 Lists** 的批量整理工作台。它同步 Stars 与 Lists，通过本地规则生成可预览的分类结果，并在确认后写回 GitHub。
+Starloom 是面向 **GitHub 仓库与原生 Lists** 的批量整理工作台。它同步当前用户拥有的仓库、Stars 与 Lists，通过统一仓库模型去重，并用同一套搜索、标签和分类能力管理。
 
 ## 核心定位
 
@@ -34,6 +34,10 @@ Starloom 要解决的问题很具体：GitHub Lists 可以整理 Stars，但原�
 当前版本已经完成 Stars 与原生 Lists 管理闭环：
 
 - 使用 GitHub Personal Access Token 连接账号
+- 同步个人、组织成员和协作仓库，并与 Stars 按 GitHub 仓库 ID 合并去重
+- “我的仓库”和“Star 仓库”两个一级模块，分别保留导航、筛选与排序状态
+- Lists、自动分类和 Unstar 操作仅在 Star 仓库模块中提供
+- “我的仓库”系统视图，以及 Owned、可见性和 Star 状态标识
 - 分页拉取全部 Stars、原生 Lists 及每个 List 的仓库
 - 全文搜索、语言筛选、收藏时间/活跃时间/Stars 排序
 - Inbox、Archived、三年未更新等智能视图
@@ -70,8 +74,8 @@ GitHub 仍将 Lists 标记为 Public Preview，schema 后续可能发生变化�
 ## 开始使用
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 打开终端输出的本地地址，输入 GitHub Personal Access Token 后进行首次同步。
@@ -95,6 +99,8 @@ node scripts/reclassify-backup.mjs <输入备份.json> <输出备份.json>
 ## 技术栈
 
 - Vue 3 + TypeScript + Vite
+- Element Plus
+- Tailwind CSS 4
 - Pinia
 - Octokit
 - Dexie / IndexedDB
@@ -102,5 +108,5 @@ node scripts/reclassify-backup.mjs <输入备份.json> <输出备份.json>
 ## 验证
 
 ```bash
-npm run build
+pnpm build
 ```

@@ -1,7 +1,17 @@
 export type RepositoryStatus = 'inbox' | 'organized' | 'watching'
+export type RepositoryOwnership = 'owned' | 'organization' | 'collaborated' | 'external'
+export type RepositoryVisibility = 'public' | 'private' | 'internal'
 
-export interface StarredRepository {
+export interface RepositoryPermissions {
+  admin: boolean
+  push: boolean
+  pull: boolean
+}
+
+export interface Repository {
   id: number
+  provider: 'github'
+  providerRepoId: string
   nodeId: string
   name: string
   owner: string
@@ -14,6 +24,10 @@ export interface StarredRepository {
   forks: number
   archived: boolean
   fork: boolean
+  isStarred: boolean
+  ownership: RepositoryOwnership
+  visibility: RepositoryVisibility
+  permissions: RepositoryPermissions
   starredAt: string
   pushedAt: string
   syncedAt: string
@@ -54,10 +68,25 @@ export interface GitHubProfile {
 }
 
 export interface BackupData {
-  version: 1
+  version: 1 | 2
   exportedAt: string
-  repositories: StarredRepository[]
+  repositories: Repository[]
   groups: StarGroup[]
 }
 
-export type RepositoryView = 'all' | 'inbox' | 'archived' | 'stale' | string
+export type RepositoryModule = 'owned' | 'starred'
+
+export type RepositoryView =
+  | 'managed'
+  | 'stars'
+  | 'owned'
+  | 'organization'
+  | 'collaborated'
+  | 'public'
+  | 'non-public'
+  | 'forks'
+  | 'owned-archived'
+  | 'inbox'
+  | 'archived'
+  | 'stale'
+  | string

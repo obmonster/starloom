@@ -1,6 +1,12 @@
 import { Octokit } from '@octokit/rest'
 
-import type { GitHubList, GitHubProfile, StarredRepository } from '../types'
+import type {
+  GitHubList,
+  GitHubProfile,
+  Repository,
+  RepositoryPermissions,
+  RepositoryVisibility
+} from '../types'
 
 interface GitHubStarredItem {
   starred_at: string
@@ -18,8 +24,14 @@ interface GitHubStarredItem {
     archived: boolean
     fork: boolean
     pushed_at: string | null
-    owner: { login: string } | null
+    owner: { login: string; type?: string } | null
   }
+}
+
+type GitHubRepositoryItem = GitHubStarredItem['repo'] & {
+  visibility?: string
+  private?: boolean
+  permissions?: Partial<RepositoryPermissions>
 }
 
 const createClient = (token: string) => new Octokit({ auth: token })
@@ -93,7 +105,47 @@ export async function fetchProfile(token: string): Promise<GitHubProfile> {
   }
 }
 
-export async function fetchAllStars(token: string): Promise<StarredRepository[]> {
+const mapRepository = (
+  repo: GitHubRepositoryItem,
+  syncedAt: string,
+  options: {
+    isStarred: boolean
+    starredAt?: string
+    ownership?: Repository['ownership']
+  }
+): Repository => ({
+  id: repo.id,
+  provider: 'github',
+  providerRepoId: String(repo.id),
+  nodeId: repo.node_id,
+  name: repo.name,
+  owner: repo.owner?.login ?? '',
+  fullName: repo.full_name,
+  description: repo.description ?? '',
+  htmlUrl: repo.html_url,
+  language: repo.language ?? 'Other',
+  topics: repo.topics ?? [],
+  stars: repo.stargazers_count,
+  forks: repo.forks_count,
+  archived: repo.archived,
+  fork: repo.fork,
+  isStarred: options.isStarred,
+  ownership: options.ownership ?? 'external',
+  visibility: (repo.visibility ?? (repo.private ? 'private' : 'public')) as RepositoryVisibility,
+  permissions: {
+    admin: repo.permissions?.admin ?? options.ownership === 'owned',
+    push: repo.permissions?.push ?? options.ownership === 'owned',
+    pull: repo.permissions?.pull ?? true
+  },
+  starredAt: options.starredAt ?? '',
+  pushedAt: repo.pushed_at ?? '',
+  syncedAt,
+  status: 'inbox',
+  groupIds: [],
+  tags: []
+})
+
+export async function fetchAllStars(token: string): Promise<Repository[]> {
   const client = createClient(token)
   const response = await client.paginate(client.rest.activity.listReposStarredByAuthenticatedUser, {
     per_page: 100,
@@ -103,27 +155,31 @@ export async function fetchAllStars(token: string): Promise<StarredRepository[]>
   })
   const now = new Date().toISOString()
 
-  return (response as unknown as GitHubStarredItem[]).map(({ repo, starred_at }) => ({
-    id: repo.id,
-    nodeId: repo.node_id,
-    name: repo.name,
-    owner: repo.owner?.login ?? '',
-    fullName: repo.full_name,
-    description: repo.description ?? '',
-    htmlUrl: repo.html_url,
-    language: repo.language ?? 'Other',
-    topics: repo.topics ?? [],
-    stars: repo.stargazers_count,
-    forks: repo.forks_count,
-    archived: repo.archived,
-    fork: repo.fork,
-    starredAt: starred_at,
-    pushedAt: repo.pushed_at ?? '',
-    syncedAt: now,
-    status: 'inbox',
-    groupIds: [],
-    tags: []
-  }))
+  return (response as unknown as GitHubStarredItem[]).map(({ repo, starred_at }) =>
+    mapRepository(repo, now, { isStarred: true, starredAt: starred_at })
+  )
+}
+
+export async function fetchManagedRepositories(
+  token: string,
+  viewerLogin: string
+): Promise<Repository[]> {
+  const client = createClient(token)
+  const response = await client.paginate(client.rest.repos.listForAuthenticatedUser, {
+    affiliation: 'owner,organization_member,collaborator',
+    visibility: 'all',
+    sort: 'pushed',
+    per_page: 100
+  })
+  const now = new Date().toISOString()
+  return (response as unknown as GitHubRepositoryItem[]).map(repository => {
+    const ownership: Repository['ownership'] = repository.owner?.login.toLowerCase() === viewerLogin.toLowerCase()
+      ? 'owned'
+      : repository.owner?.type === 'Organization'
+        ? 'organization'
+        : 'collaborated'
+    return mapRepository(repository, now, { isStarred: false, ownership })
+  })
 }
 
 async function fetchRemainingListItems(

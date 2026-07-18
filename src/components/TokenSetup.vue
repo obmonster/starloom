@@ -1,42 +1,68 @@
 <template>
-  <main class="connect-shell">
-    <section class="connect-card">
-      <div class="brand-mark brand-mark--large">✦</div>
-      <p class="eyebrow">NATIVE GITHUB LISTS, BATCHED</p>
-      <h1>批量整理 GitHub<br />原生 Lists</h1>
-      <p class="connect-card__intro">
-        Starloom 同步 Stars 与原生 Lists，在本地预览批量分类结果，并在确认后通过 GitHub
-        GraphQL API 安全写回。
-      </p>
-
-      <form class="token-form" @submit.prevent="handleSubmit">
-        <label for="github-token">GitHub Personal Access Token</label>
-        <div class="token-form__row">
-          <input
-            id="github-token"
-            v-model="token"
-            required
-            autocomplete="off"
-            placeholder="github_pat_... 或 ghp_..."
-            type="password"
-          />
-          <button class="button button--primary" type="submit" :disabled="loading">
-            {{ loading ? '连接中…' : '连接 GitHub' }}
-          </button>
-        </div>
-        <p v-if="error" class="form-error">{{ error }}</p>
-      </form>
-
-      <div class="permission-note">
-        <strong>建议使用最小权限 Token</strong>
-        <span>Token 需要允许读取 Stars 与 Lists；修改 Lists 或执行 Unstar 时还需要对应写权限。</span>
+  <div class="connect-shell">
+    <div class="connect-card">
+      <div class="connect-card__identity">
+        <span class="brand-mark">
+          <ElIcon>
+            <StarFilled />
+          </ElIcon>
+        </span>
+        <span>Starloom</span>
       </div>
-    </section>
-  </main>
+
+      <div class="connect-card__content">
+        <div class="connect-card__heading">
+          <div class="connect-card__title">连接 GitHub</div>
+          <ElSwitch
+            v-model="darkMode"
+            inline-prompt
+            aria-label="切换深色或浅色主题"
+            active-text="暗"
+            inactive-text="亮"
+            :active-action-icon="Moon"
+            :inactive-action-icon="Sunny"
+          />
+        </div>
+        <ElForm
+          class="token-form"
+          label-position="top"
+          @submit.prevent="handleSubmit"
+        >
+          <ElFormItem label="Personal Access Token">
+            <ElInput
+              v-model="token"
+              show-password
+              size="large"
+              type="password"
+              placeholder="github_pat_... 或 ghp_..."
+              autocomplete="off"
+            />
+          </ElFormItem>
+          <ElButton
+            size="large"
+            type="primary"
+            class="w-full"
+            native-type="submit"
+            :loading="loading"
+          >连接</ElButton>
+          <ElAlert
+            v-if="error"
+            show-icon
+            type="error"
+            :title="error"
+            :closable="false"
+          />
+        </ElForm>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Moon, StarFilled, Sunny } from '@element-plus/icons-vue'
+
+const darkMode = defineModel<boolean>('darkMode', { required: true })
 
 defineProps<{
   loading: boolean

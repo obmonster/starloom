@@ -1,6 +1,6 @@
 import ruleCatalog from './classificationRules.json'
 
-import type { StarredRepository } from '../types'
+import type { Repository } from '../types'
 
 export interface ClassificationRule {
   group: string
@@ -19,7 +19,7 @@ const tokenize = (value: string) => {
   return new Set(compounds.flatMap(token => [token, ...token.split(/[.-]/)]))
 }
 
-const scoreRule = (repository: StarredRepository, rule: ClassificationRule) => {
+const scoreRule = (repository: Repository, rule: ClassificationRule) => {
   const nameTokens = tokenize(normalize(repository.fullName))
   const topicTokens = tokenize(normalize(repository.topics.join(' ')))
   const descriptionTokens = tokenize(normalize(repository.description))
@@ -36,7 +36,7 @@ const scoreRule = (repository: StarredRepository, rule: ClassificationRule) => {
   }, languageMatch ? 6 : 0)
 }
 
-export function suggestGroups(repository: StarredRepository): ClassificationRule[] {
+export function suggestGroups(repository: Repository): ClassificationRule[] {
   let bestRule: ClassificationRule | undefined
   let bestScore = 0
 
@@ -51,7 +51,7 @@ export function suggestGroups(repository: StarredRepository): ClassificationRule
   return bestRule ? [bestRule] : []
 }
 
-export function isStale(repository: StarredRepository): boolean {
+export function isStale(repository: Repository): boolean {
   if (!repository.pushedAt) return true
   const threeYearsAgo = new Date()
   threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3)

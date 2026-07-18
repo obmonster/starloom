@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "./theme.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./sidebar.css";
+@import "./repository.css";
+@import "./login.css";
+@import "./responsive.css";
+
+/* @custom-variant dark (&:where(.dark, .dark *));
+	Commented out: unknown at-rule caused parser errors. If using a Tailwind
+	plugin that provides @custom-variant, re-enable or configure that plugin.
+*/

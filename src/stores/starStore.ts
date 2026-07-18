@@ -8,6 +8,7 @@ import {
   deleteGitHubList,
   fetchAllStars,
   fetchGitHubLists,
+  fetchManagedRepositories,
   fetchProfile,
   unstarRepository,
   updateGitHubList,
@@ -18,8 +19,8 @@ import type {
   BackupData,
   GitHubList,
   GitHubProfile,
-  StarGroup,
-  StarredRepository
+  Repository,
+  StarGroup
 } from '../types'
 
 const TOKEN_KEY = 'starloom.github-token'
@@ -32,12 +33,13 @@ const listColor = (id: string) => {
 }
 
 const cloneRepository = (
-  repository: StarredRepository,
-  changes: Partial<StarredRepository> = {}
-): StarredRepository => {
+  repository: Repository,
+  changes: Partial<Repository> = {}
+): Repository => {
   const merged = { ...repository, ...changes }
   return {
     ...merged,
+    permissions: { ...merged.permissions },
     topics: [...merged.topics],
     groupIds: [...merged.groupIds],
     tags: [...merged.tags]
@@ -47,20 +49,56 @@ const cloneRepository = (
 const cloneGroup = (group: StarGroup): StarGroup => ({ ...group })
 
 const mergeRepository = (
-  incoming: StarredRepository,
-  existing: StarredRepository | undefined,
+  incoming: Repository,
+  existing: Repository | undefined,
   githubGroupIds: string[],
   previousGitHubGroupIds: Set<string>
-): StarredRepository => ({
+): Repository => ({
   ...cloneRepository(incoming, {
-    status: existing?.status ?? incoming.status,
-    groupIds: [
-      ...(existing?.groupIds.filter(groupId => !previousGitHubGroupIds.has(groupId)) ?? []),
-      ...githubGroupIds
-    ],
-    tags: existing?.tags ?? []
+    status: incoming.isStarred ? existing?.status ?? incoming.status : 'inbox',
+    groupIds: incoming.isStarred
+      ? [
+          ...(existing?.groupIds.filter(groupId => !previousGitHubGroupIds.has(groupId)) ?? []),
+          ...githubGroupIds
+        ]
+      : [],
+    tags: incoming.isStarred ? existing?.tags ?? [] : []
   })
 })
+
+const normalizeRepository = (repository: Repository): Repository => {
+  const isStarred = repository.isStarred ?? true
+  return {
+    ...repository,
+    provider: repository.provider ?? 'github',
+    providerRepoId: repository.providerRepoId ?? String(repository.id),
+    isStarred,
+    ownership: repository.ownership ?? 'external',
+    visibility: repository.visibility ?? 'public',
+    permissions: {
+      ...(repository.permissions ?? { admin: false, push: false, pull: true })
+    },
+    starredAt: isStarred ? repository.starredAt ?? '' : '',
+    status: isStarred ? repository.status ?? 'inbox' : 'inbox',
+    topics: [...(repository.topics ?? [])],
+    groupIds: isStarred ? [...(repository.groupIds ?? [])] : [],
+    tags: isStarred ? [...(repository.tags ?? [])] : []
+  }
+}
+
+const combineRepositories = (starred: Repository[], managed: Repository[]): Repository[] => {
+  const combined = new Map(starred.map(repository => [repository.id, repository]))
+  for (const repository of managed) {
+    const star = combined.get(repository.id)
+    combined.set(repository.id, {
+      ...star,
+      ...repository,
+      isStarred: star?.isStarred ?? false,
+      starredAt: star?.starredAt ?? ''
+    })
+  }
+  return [...combined.values()]
+}
 
 const mapGitHubList = (list: GitHubList, existing?: StarGroup): StarGroup => ({
   id: existing?.id ?? list.id,
@@ -74,7 +112,7 @@ const mapGitHubList = (list: GitHubList, existing?: StarGroup): StarGroup => ({
 })
 
 export const useStarStore = defineStore('stars', () => {
-  const repositories = ref<StarredRepository[]>([])
+  const repositories = ref<Repository[]>([])
   const groups = ref<StarGroup[]>([])
   const profile = ref<GitHubProfile>()
   const token = ref(localStorage.getItem(TOKEN_KEY) ?? '')
@@ -95,7 +133,7 @@ export const useStarStore = defineStore('stars', () => {
         db.groups.toArray(),
         db.settings.get('lastSyncAt')
       ])
-      repositories.value = savedRepositories
+      repositories.value = savedRepositories.map(normalizeRepository)
       groups.value = savedGroups.sort((a, b) => a.name.localeCompare(b.name))
       lastSyncAt.value = syncSetting?.value ?? ''
 
@@ -130,16 +168,20 @@ export const useStarStore = defineStore('stars', () => {
     localStorage.removeItem(PROFILE_KEY)
   }
 
-  async function syncStars() {
+  async function syncRepositories() {
     if (!token.value) throw new Error('请先连接 GitHub')
 
     syncing.value = true
     error.value = ''
     try {
-      const [incoming, githubLists] = await Promise.all([
+      const viewerLogin = profile.value?.login
+      if (!viewerLogin) throw new Error('缺少 GitHub 用户信息，请重新连接')
+      const [starredRepositories, managedRepositories, githubLists] = await Promise.all([
         fetchAllStars(token.value),
+        fetchManagedRepositories(token.value, viewerLogin),
         fetchGitHubLists(token.value)
       ])
+      const incoming = combineRepositories(starredRepositories, managedRepositories)
       const existing = new Map(repositories.value.map(repository => [repository.id, repository]))
       const previousGitHubGroupIds = new Set(
         groups.value.filter(group => group.githubId).map(group => group.id)
@@ -345,9 +387,10 @@ export const useStarStore = defineStore('stars', () => {
     )
 
   async function writeRepositoryGroups(
-    repository: StarredRepository,
+    repository: Repository,
     groupIds: string[]
-  ): Promise<StarredRepository> {
+  ): Promise<Repository> {
+    if (!repository.isStarred) throw new Error('只有 Star 仓库可以加入 Lists')
     const currentListIds = githubListIds(repository.groupIds).sort()
     const nextListIds = githubListIds(groupIds).sort()
     if (currentListIds.join('\0') !== nextListIds.join('\0')) {
@@ -370,8 +413,8 @@ export const useStarStore = defineStore('stars', () => {
   ) {
     const targets = ids
       .map(id => repositoryMap.value.get(id))
-      .filter((repository): repository is StarredRepository => Boolean(repository))
-    const completed: StarredRepository[] = []
+      .filter((repository): repository is Repository => Boolean(repository))
+    const completed: Repository[] = []
     try {
       for (const repository of targets) {
         const groupIds = action === 'add'
@@ -400,7 +443,7 @@ export const useStarStore = defineStore('stars', () => {
     const cleanTags = nextTags.map(tag => tag.trim()).filter(Boolean)
     const updates = ids
       .map(id => repositoryMap.value.get(id))
-      .filter((repository): repository is StarredRepository => Boolean(repository))
+      .filter((repository): repository is Repository => Boolean(repository))
       .map(repository => cloneRepository(repository, {
         tags: [...new Set([...repository.tags, ...cleanTags])]
       }))
@@ -412,7 +455,7 @@ export const useStarStore = defineStore('stars', () => {
   async function autoClassify(ids: number[]): Promise<number> {
     const targetRepositories = ids
       .map(id => repositoryMap.value.get(id))
-      .filter((repository): repository is StarredRepository => Boolean(repository))
+      .filter((repository): repository is Repository => Boolean(repository))
     const groupByName = new Map(groups.value.map(group => [group.name, group]))
     const managedGroupNames = new Set(classificationRules.map(rule => rule.group))
     const suggestionsByRepository = new Map(
@@ -433,7 +476,7 @@ export const useStarStore = defineStore('stars', () => {
       }
     }
 
-    const completed: StarredRepository[] = []
+    const completed: Repository[] = []
     const managedGroupIds = new Set(
       groups.value.filter(group => managedGroupNames.has(group.name)).map(group => group.id)
     )
@@ -464,25 +507,45 @@ export const useStarStore = defineStore('stars', () => {
     if (!token.value) throw new Error('请先连接 GitHub')
     const targets = ids
       .map(id => repositoryMap.value.get(id))
-      .filter((repository): repository is StarredRepository => Boolean(repository))
+      .filter((repository): repository is Repository => Boolean(repository))
 
     const completedIds: number[] = []
     try {
       for (const repository of targets) {
+        if (!repository.isStarred) continue
         await unstarRepository(token.value, repository.fullName)
-        await db.repositories.delete(repository.id)
+        const updated = cloneRepository(repository, {
+          isStarred: false,
+          starredAt: '',
+          status: 'inbox',
+          groupIds: [],
+          tags: []
+        })
+        if (repository.ownership !== 'external') await db.repositories.put(updated)
+        else await db.repositories.delete(repository.id)
         completedIds.push(repository.id)
         onProgress?.(completedIds.length)
       }
     } finally {
       const removedIds = new Set(completedIds)
-      repositories.value = repositories.value.filter(repository => !removedIds.has(repository.id))
+      repositories.value = repositories.value.flatMap(repository => {
+        if (!removedIds.has(repository.id)) return [repository]
+        return repository.ownership !== 'external'
+          ? [cloneRepository(repository, {
+              isStarred: false,
+              starredAt: '',
+              status: 'inbox',
+              groupIds: [],
+              tags: []
+            })]
+          : []
+      })
     }
   }
 
   function exportBackup(): BackupData {
     return {
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       repositories: repositories.value,
       groups: groups.value
@@ -490,16 +553,17 @@ export const useStarStore = defineStore('stars', () => {
   }
 
   async function importBackup(backup: BackupData) {
-    if (backup.version !== 1 || !Array.isArray(backup.repositories) || !Array.isArray(backup.groups)) {
+    if (![1, 2].includes(backup.version) || !Array.isArray(backup.repositories) || !Array.isArray(backup.groups)) {
       throw new Error('无法识别的备份文件')
     }
+    const normalizedRepositories = backup.repositories.map(normalizeRepository)
     await db.transaction('rw', db.repositories, db.groups, async () => {
       await db.repositories.clear()
       await db.groups.clear()
-      await db.repositories.bulkPut(backup.repositories)
+      await db.repositories.bulkPut(normalizedRepositories)
       await db.groups.bulkPut(backup.groups)
     })
-    repositories.value = backup.repositories
+    repositories.value = normalizedRepositories
     groups.value = backup.groups.sort((a, b) => a.name.localeCompare(b.name))
   }
 
@@ -515,7 +579,7 @@ export const useStarStore = defineStore('stars', () => {
     initialize,
     connect,
     disconnect,
-    syncStars,
+    syncRepositories,
     createGroup,
     updateGroup,
     publishGroup,

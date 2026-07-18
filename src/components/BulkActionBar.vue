@@ -1,35 +1,44 @@
 <template>
   <div class="bulk-bar">
-    <strong>已选择 {{ selectedCount }} 个</strong>
+    <span class="font-semibold">已选择 {{ selectedCount }} 个</span>
     <span class="bulk-bar__divider" />
-    <select v-model="groupId" aria-label="目标分组">
-      <option value="">加入 GitHub List…</option>
-      <option v-for="group in groups" :key="group.id" :value="group.id">{{ group.name }}</option>
-    </select>
-    <button class="button button--compact" type="button" :disabled="!groupId" @click="assignGroup">
-      应用
-    </button>
-    <input v-model="tags" class="bulk-bar__tags" placeholder="标签，逗号分隔" />
-    <button class="button button--compact" type="button" :disabled="!tags.trim()" @click="addTags">
-      添加标签
-    </button>
-    <button class="button button--compact" type="button" @click="emit('auto-classify')">
-      ✦ 自动分类
-    </button>
-    <button class="button button--compact button--danger" type="button" @click="emit('unstar')">
-      Unstar
-    </button>
-    <button class="bulk-bar__close" type="button" @click="emit('clear')">×</button>
+    <ElSelect
+      v-model="groupId"
+      class="w-44"
+      aria-label="目标分组"
+      placeholder="加入 GitHub List…"
+    >
+      <ElOption v-for="group in groups" :key="group.id" :label="group.name" :value="group.id" />
+    </ElSelect>
+    <ElButton :icon="Check" :disabled="!groupId" @click="assignGroup">应用</ElButton>
+    <ElInput v-model="tags" class="min-w-40 flex-1" placeholder="标签，逗号分隔" />
+    <ElButton :icon="PriceTag" :disabled="!tags.trim()" @click="addTags">添加标签</ElButton>
+    <ElButton :icon="MagicStick" @click="emit('auto-classify')">自动分类</ElButton>
+    <ElButton
+      type="danger"
+      :icon="Star"
+      :disabled="!starredCount"
+      @click="emit('unstar')"
+    >Unstar{{ starredCount ? ` (${starredCount})` : '' }}</ElButton>
+    <ElButton
+      text
+      circle
+      aria-label="清除选择"
+      :icon="Close"
+      @click="emit('clear')"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Check, Close, MagicStick, PriceTag, Star } from '@element-plus/icons-vue'
 
 import type { StarGroup } from '../types'
 
 defineProps<{
   selectedCount: number
+  starredCount: number
   groups: StarGroup[]
 }>()
 

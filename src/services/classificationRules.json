@@ -31,6 +31,12 @@
     "keywords": ["micro-app", "microapp", "micro-frontend", "micro-frontends", "microfrontend", "qiankun", "wujie", "single-spa", "module-federation"]
   },
   {
+    "group": "Platform · Browser Extensions",
+    "description": "浏览器扩展、Userscript 管理器与 WebExtension 工具。",
+    "color": "#f97316",
+    "keywords": ["browser-extension", "browser-extensions", "browser-addon", "browser-addons", "webextension", "webextensions", "userscript", "userscripts", "user-script", "user-scripts", "tampermonkey", "violentmonkey", "greasemonkey", "chrome-extension", "firefox-extension"]
+  },
+  {
     "group": "Platform · Desktop",
     "description": "Electron、Tauri 与 Windows、macOS、Linux 桌面应用。",
     "color": "#8b5cf6",

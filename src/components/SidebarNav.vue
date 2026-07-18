@@ -1,84 +1,86 @@
 <template>
-  <aside class="sidebar">
-    <div class="sidebar__brand">
-      <span class="brand-mark">✦</span>
-      <div>
-        <strong>Starloom</strong>
-        <span>GitHub Stars 管理工作台</span>
-      </div>
-    </div>
-
-    <nav class="sidebar__nav" aria-label="仓库视图">
-      <p class="sidebar__label">仓库</p>
-      <button
+  <div class="sidebar">
+    <div class="sidebar__nav" aria-label="仓库视图">
+      <div class="sidebar__label">{{ module === 'owned' ? '仓库范围' : '智能视图' }}</div>
+      <ElButton
         v-for="item in systemViews"
+        text
+        class="nav-item !ml-0"
         :key="item.id"
-        class="nav-item"
         :class="{ 'nav-item--active': activeView === item.id }"
-        type="button"
         @click="emit('select-view', item.id)"
       >
-        <span><span class="nav-item__icon">{{ item.icon }}</span>{{ item.label }}</span>
-        <small>{{ item.count }}</small>
-      </button>
+        <span class="nav-item__content">
+          <ElIcon class="nav-item__icon">
+            <component :is="item.icon" />
+          </ElIcon>
+          {{ item.label }}
+        </span>
+        <span class="text-xs">{{ item.count }}</span>
+      </ElButton>
 
-      <div class="sidebar__heading">
-        <p class="sidebar__label">LISTS</p>
-        <button class="icon-button" title="新建分组" type="button" @click="emit('create-group')">
-          ＋
-        </button>
-      </div>
-      <div
-        v-for="group in groups"
-        :key="group.id"
-        class="group-nav-row"
-      >
-        <button
-          class="nav-item"
-          :class="{ 'nav-item--active': activeView === group.id }"
-          type="button"
-          @click="emit('select-view', group.id)"
-        >
-          <span>
-            <i class="group-dot" :style="{ backgroundColor: group.color }" />
-            <span class="group-name">{{ group.name }}</span>
-            <i
-              v-if="group.githubId"
-              class="group-origin"
-              :title="group.isPrivate ? 'GitHub Private List' : 'GitHub Public List'"
-            >{{ group.isPrivate ? '◆' : '◇' }}</i>
-            <i v-else class="group-origin" title="尚未发布到 GitHub">LOCAL</i>
-          </span>
-          <small>{{ groupCounts[group.id] ?? 0 }}</small>
-        </button>
-        <div class="group-nav-row__actions">
-          <button
+      <template v-if="module === 'starred'">
+        <div class="sidebar__heading">
+          <div class="sidebar__label">LISTS</div>
+          <ElButton
+            text
+            circle
             class="icon-button"
-            type="button"
-            :title="`编辑 ${group.name}`"
-            @click="emit('edit-group', group.id)"
-          >✎</button>
-          <button
-            class="icon-button"
-            type="button"
-            :title="`删除 ${group.name}`"
-            @click="emit('delete-group', group.id)"
-          >×</button>
+            title="新建 List"
+            :icon="Plus"
+            @click="emit('create-group')"
+          />
         </div>
-      </div>
-    </nav>
-
-    <div v-if="profile" class="profile-card">
-      <img :alt="profile.login" :src="profile.avatarUrl" />
-      <div>
-        <strong>{{ profile.login }}</strong>
-        <span>{{ lastSyncLabel }}</span>
-      </div>
-      <button class="icon-button" title="断开连接" type="button" @click="emit('disconnect')">↗</button>
+        <div v-for="group in groups" :key="group.id" class="group-nav-row">
+          <ElButton
+            text
+            class="nav-item !ml-0"
+            :class="{ 'nav-item--active': activeView === group.id }"
+            @click="emit('select-view', group.id)"
+          >
+            <span class="nav-item__content">
+              <span class="group-dot inline-block" :style="{ backgroundColor: group.color }" />
+              <span class="group-name">{{ group.name }}</span>
+              <ElIcon
+                v-if="group.githubId"
+                class="group-origin"
+                :title="group.isPrivate ? 'GitHub Private List' : 'GitHub Public List'"
+              >
+                <component :is="group.isPrivate ? Lock : Unlock" />
+              </ElIcon>
+              <span v-else class="group-origin" title="尚未发布到 GitHub">LOCAL</span>
+            </span>
+            <span class="text-xs">{{ groupCounts[group.id] ?? 0 }}</span>
+          </ElButton>
+          <div class="group-nav-row__actions">
+            <ElButton
+              text
+              circle
+              class="icon-button !ml-0"
+              :icon="EditPen"
+              :title="`编辑 ${group.name}`"
+              @click="emit('edit-group', group.id)"
+            />
+            <ElButton
+              text
+              circle
+              class="icon-button !ml-0"
+              :icon="Delete"
+              :title="`删除 ${group.name}`"
+              @click="emit('delete-group', group.id)"
+            />
+          </div>
+        </div>
+      </template>
     </div>
 
-    <button
-      type="button"
+    <div class="sidebar-status">
+      <span class="sidebar-status__dot" />
+      <span>{{ lastSyncLabel }}</span>
+    </div>
+
+    <ElButton
+      text
       class="sidebar__resize-handle"
       title="拖动调整侧栏宽度，双击恢复默认宽度"
       aria-label="调整侧栏宽度"
@@ -86,24 +88,49 @@
       @dblclick="emit('resize', DEFAULT_WIDTH)"
       @pointerdown="startResize"
     />
-  </aside>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount } from 'vue'
+import {
+  Box,
+  Collection,
+  Connection,
+  Delete,
+  EditPen,
+  ForkSpoon,
+  Lock,
+  OfficeBuilding,
+  Plus,
+  StarFilled,
+  TakeawayBox,
+  Timer,
+  Unlock,
+  User
+} from '@element-plus/icons-vue'
 
-import type { GitHubProfile, RepositoryView, StarGroup } from '../types'
+import type { Component } from 'vue'
+import type { StarGroup, RepositoryView, RepositoryModule } from '../types'
 
 const props = defineProps<{
   width: number
+  module: RepositoryModule
   groups: StarGroup[]
   groupCounts: Record<string, number>
   activeView: RepositoryView
-  totalCount: number
+  managedCount: number
+  ownedCount: number
+  organizationCount: number
+  collaboratedCount: number
+  publicCount: number
+  nonPublicCount: number
+  forkCount: number
+  ownedArchivedCount: number
+  starCount: number
   inboxCount: number
   archivedCount: number
   staleCount: number
-  profile?: GitHubProfile
   lastSyncAt: string
 }>()
 
@@ -113,15 +140,38 @@ const emit = defineEmits<{
   'edit-group': [groupId: string]
   'delete-group': [groupId: string]
   resize: [width: number]
-  disconnect: []
 }>()
 
-const DEFAULT_WIDTH = 440
+const DEFAULT_WIDTH = 280
 const RESIZE_STEP = 16
 let handlePointerMove: ((event: PointerEvent) => void) | undefined
 let handlePointerUp: (() => void) | undefined
 let previousCursor = ''
 let previousUserSelect = ''
+
+const systemViews = computed(() => props.module === 'owned'
+  ? [
+      { id: 'managed', label: '全部仓库', icon: Collection, count: props.managedCount },
+      { id: 'owned', label: '个人仓库', icon: User, count: props.ownedCount },
+      { id: 'organization', label: '组织仓库', icon: OfficeBuilding, count: props.organizationCount },
+      { id: 'collaborated', label: '协作仓库', icon: Connection, count: props.collaboratedCount },
+      { id: 'public', label: 'Public', icon: Unlock, count: props.publicCount },
+      { id: 'non-public', label: 'Private / Internal', icon: Lock, count: props.nonPublicCount },
+      { id: 'forks', label: 'Fork', icon: ForkSpoon, count: props.forkCount },
+      { id: 'owned-archived', label: 'Archived', icon: Box, count: props.ownedArchivedCount }
+    ] as Array<{ id: RepositoryView; label: string; icon: Component; count: number }>
+  : [
+      { id: 'stars', label: '全部 Stars', icon: StarFilled, count: props.starCount },
+      { id: 'inbox', label: '待整理', icon: TakeawayBox, count: props.inboxCount },
+      { id: 'archived', label: '已归档', icon: Box, count: props.archivedCount },
+      { id: 'stale', label: '长期未更新', icon: Timer, count: props.staleCount }
+    ] as Array<{ id: RepositoryView; label: string; icon: Component; count: number }>
+)
+
+const lastSyncLabel = computed(() => {
+  if (!props.lastSyncAt) return '尚未同步'
+  return `同步于 ${new Date(props.lastSyncAt).toLocaleString('zh-CN')}`
+})
 
 const stopResize = () => {
   if (handlePointerMove) window.removeEventListener('pointermove', handlePointerMove)
@@ -148,9 +198,7 @@ const startResize = (event: PointerEvent) => {
   document.body.style.cursor = 'col-resize'
   document.body.style.userSelect = 'none'
 
-  handlePointerMove = moveEvent => {
-    emit('resize', startWidth + moveEvent.clientX - startX)
-  }
+  handlePointerMove = moveEvent => emit('resize', startWidth + moveEvent.clientX - startX)
   handlePointerUp = stopResize
   window.addEventListener('pointermove', handlePointerMove)
   window.addEventListener('blur', handlePointerUp, { once: true })
@@ -161,25 +209,9 @@ const startResize = (event: PointerEvent) => {
 const handleResizeKeydown = (event: KeyboardEvent) => {
   if (!['ArrowLeft', 'ArrowRight', 'Home'].includes(event.key)) return
   event.preventDefault()
-
-  if (event.key === 'Home') {
-    emit('resize', DEFAULT_WIDTH)
-    return
-  }
+  if (event.key === 'Home') return emit('resize', DEFAULT_WIDTH)
   emit('resize', props.width + (event.key === 'ArrowLeft' ? -RESIZE_STEP : RESIZE_STEP))
 }
 
 onBeforeUnmount(stopResize)
-
-const systemViews = computed(() => [
-  { id: 'all', label: '全部收藏', icon: '✦', count: props.totalCount },
-  { id: 'inbox', label: '待整理', icon: '⌁', count: props.inboxCount },
-  { id: 'archived', label: '已归档', icon: '□', count: props.archivedCount },
-  { id: 'stale', label: '长期未更新', icon: '◷', count: props.staleCount }
-])
-
-const lastSyncLabel = computed(() => {
-  if (!props.lastSyncAt) return '尚未同步'
-  return `同步于 ${new Date(props.lastSyncAt).toLocaleString('zh-CN')}`
-})
 </script>
